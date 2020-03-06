@@ -1,0 +1,7 @@
+{
+    "python.pythonPath": "C:\\Program Files\\Blender Foundation\\Blender 2.82\\2.82\\python\\bin\\python.exe",
+    "python.autoComplete.extraPaths": [
+        "C:\\Program Files\\Blender Foundation\\Blender 2.82\\2.82\\python\\lib"
+    ],
+    "blender.addon.reloadOnSave": true
+}
