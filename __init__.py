@@ -81,7 +81,7 @@ class HELLO_PT_World3(HelloWorldPanel, bpy.types.Panel):
 
 classes = (
     HELLO_PT_World1,
-    HELLO_PT_World2, 
+    HELLO_PT_World2,
     HELLO_PT_World3,
     ObjectMoveX
 )

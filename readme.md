@@ -49,4 +49,3 @@ cd /c/Program Files/Blender Foundation/Blender 2.82/2.82/python/bin
 
 - See the `samples/the-initial-addon.py` file.
 - At this point, it should not be announcing any syntax or formatting errors.
-- 
