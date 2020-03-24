@@ -13,9 +13,10 @@
 
 import bpy
 from bpy.props import *
-from bpy.types import Collection, CollectionObjects
+from bpy.types import Collection, CollectionObjects, Object
 from collections import defaultdict
 import string
+import uuid
 
 bl_info = {
     "name": "Move X Axis",
@@ -28,20 +29,28 @@ bl_info = {
     "category": "Object"
 }
 
-
 class ObjectsToFaceCamera(bpy.types.Operator):
     """Education Arena Interactables Camera Setup"""      # Use this as a tooltip for menu items and buttons.
     bl_idname = "arena.face_camera"        # Unique identifier for buttons and menu items to reference.
-    bl_label = "Interactables Face Camera"         # Display name in the interface.
+    bl_label = "uid"         # Display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
 
     # execute() is called when running the operator.
     def execute(self, context):
 
-        # The original script
-        scene = context.scene
-        for obj in scene.collections:
-            obj.location.x += 1.0
+        metaCollection: Collection = bpy.context.scene.collection.children["Meta"]
+        cameraPointsCollection: CollectionObjects = metaCollection.children["cp"]
+        for item in cameraPointsCollection.objects:
+            if "uid" in item.keys():
+                print (item["uid"])
+            else:
+                item["uid"] = str(uuid.uuid4())
+                print (item["uid"])
+            pass
+
+        obj = bpy.context.view_layer.objects.active
+        obj.select_set(False)
+        obj.select_set(True)
 
         # Lets Blender know the operator finished successfully.
         return {'FINISHED'}
@@ -64,34 +73,18 @@ class HELLO_PT_World1(HelloWorldPanel, bpy.types.Panel):
         layout = self.layout
         metaCollection: Collection = bpy.context.scene.collection.children["Meta"]
         cameraPointsCollection: CollectionObjects = metaCollection.children["cp"]
+        activeObject: Object = cameraPointsCollection.objects["a"]
         layout.label(text="Items in Collection")
         col = layout.column()
-        col.label(text=cameraPointsCollection.objects["a"].name)
-        col.label(text=cameraPointsCollection.objects["a"].location.__str__())
-
-
-class HELLO_PT_World2(HelloWorldPanel, bpy.types.Panel):
-    bl_parent_id = "HELLO_PT_World1"
-    bl_label = "Panel 2"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text="First Sub Panel of Panel 1.")
-
-
-class HELLO_PT_World3(HelloWorldPanel, bpy.types.Panel):
-    bl_parent_id = "HELLO_PT_World1"
-    bl_label = "Panel 3"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text="Second Sub Panel of Panel 1.")
-
+        col.label(text=activeObject.name)
+        col.separator()
+        col.label(text=activeObject.location.__str__())
+        col.separator()
+        if "uid" in bpy.context.view_layer.objects.active.keys():
+            col.label(text=bpy.context.view_layer.objects.active["uid"].__str__())
 
 classes = (
     HELLO_PT_World1,
-    HELLO_PT_World2,
-    HELLO_PT_World3,
     ObjectsToFaceCamera
 )
 
