@@ -12,6 +12,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import bpy
+from bpy.props import *
+from bpy.types import Collection, CollectionObjects
+from collections import defaultdict
+import string
 
 bl_info = {
     "name": "Move X Axis",
@@ -25,10 +29,10 @@ bl_info = {
 }
 
 
-class ObjectMoveX(bpy.types.Operator):
-    """My Object Moving Script"""      # Use this as a tooltip for menu items and buttons.
-    bl_idname = "object.move_x"        # Unique identifier for buttons and menu items to reference.
-    bl_label = "Move X by One"         # Display name in the interface.
+class ObjectsToFaceCamera(bpy.types.Operator):
+    """Education Arena Interactables Camera Setup"""      # Use this as a tooltip for menu items and buttons.
+    bl_idname = "arena.face_camera"        # Unique identifier for buttons and menu items to reference.
+    bl_label = "Interactables Face Camera"         # Display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo for the operator.
 
     # execute() is called when running the operator.
@@ -36,7 +40,7 @@ class ObjectMoveX(bpy.types.Operator):
 
         # The original script
         scene = context.scene
-        for obj in scene.objects:
+        for obj in scene.collections:
             obj.location.x += 1.0
 
         # Lets Blender know the operator finished successfully.
@@ -58,7 +62,12 @@ class HELLO_PT_World1(HelloWorldPanel, bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="This is the main panel.")
+        metaCollection: Collection = bpy.context.scene.collection.children["Meta"]
+        cameraPointsCollection: CollectionObjects = metaCollection.children["cp"]
+        layout.label(text="Items in Collection")
+        col = layout.column()
+        col.label(text=cameraPointsCollection.objects["a"].name)
+        col.label(text=cameraPointsCollection.objects["a"].location.__str__())
 
 
 class HELLO_PT_World2(HelloWorldPanel, bpy.types.Panel):
@@ -83,7 +92,7 @@ classes = (
     HELLO_PT_World1,
     HELLO_PT_World2,
     HELLO_PT_World3,
-    ObjectMoveX
+    ObjectsToFaceCamera
 )
 
 
