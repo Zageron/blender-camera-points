@@ -3,8 +3,8 @@ import bpy
 class gem_op_AddLights(bpy.types.Operator):
     """ Add a ring of lights to the scene! """
 
-    bl_idname = "gem.add_lights"
-    bl_label = "Add Lights"
+    bl_idname = "zag.add_camera_point"
+    bl_label = "Add Camera Point"
     bl_options = { 'REGISTER', 'UNDO' }
 
     from bpy.props import IntProperty, FloatProperty

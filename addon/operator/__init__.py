@@ -1,4 +1,4 @@
-from .add_lights import gem_op_AddLights
+from .add_camera_point import gem_op_AddLights
 
 classes = (
     gem_op_AddLights,
