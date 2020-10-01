@@ -49,7 +49,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
             row = layout.row(align=True)
             row.prop(selectedObject, "location")
 
-        # Buttom to snap to the selected point (say we grabbed it in the collections)
+        # Button to snap to the selected point (say we grabbed it in the collections)
         # Preview Mode vs Edit Mode
         ## Preview Mode should stick the primary to the point, at the correct orientation.
         ## Edit Mode should just move to the object as normal viewport might.
