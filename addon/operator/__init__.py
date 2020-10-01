@@ -1,7 +1,7 @@
-from .add_camera_point import gem_op_AddLights
+from .add_camera_point import zag_op_AddCameraPoint
 
 classes = (
-    gem_op_AddLights,
+    zag_op_AddCameraPoint,
 )
 
 def register_operators():

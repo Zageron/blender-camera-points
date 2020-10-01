@@ -1,54 +1,46 @@
 import bpy
+import uuid
 
-class gem_op_AddLights(bpy.types.Operator):
-    """ Add a ring of lights to the scene! """
+
+class zag_op_AddCameraPoint(bpy.types.Operator):
+    """ Add a camera point, with associated metadata, to the scene. """
 
     bl_idname = "zag.add_camera_point"
     bl_label = "Add Camera Point"
-    bl_options = { 'REGISTER', 'UNDO' }
+    bl_options = {'REGISTER', 'UNDO'}
 
-    from bpy.props import IntProperty, FloatProperty
-    radius: FloatProperty(name="Radius", default=1, min=1, max=100)
-    height: FloatProperty(name="Height", default=1, min=0, max=10)
-    count: IntProperty(name="Light Count", default=3, min=3, max=50)
-    energy: IntProperty(name="Light Energy", default=1000, min=500, max=2500)
+    # from bpy.props import IntProperty, FloatProperty
+    # radius: FloatProperty(name="Radius", default=1, min=1, max=100)
+    # height: FloatProperty(name="Height", default=1, min=0, max=10)
+    # count: IntProperty(name="Light Count", default=3, min=3, max=50)
+    # energy: IntProperty(name="Light Energy", default=1000, min=500, max=2500)
 
-    def draw(self, context):
-        layout = self.layout
-        layout.prop(self, 'radius')
-        layout.prop(self, 'height')
-        layout.prop(self, 'count')
-        layout.prop(self, 'energy')
+    # def draw(self, context):
+    #     layout = self.layout
+    #     layout.prop(self, 'radius')
+    #     layout.prop(self, 'height')
+    #     layout.prop(self, 'count')
+    #     layout.prop(self, 'energy')
 
     def execute(self, context):
-        import math
 
-        lights = []
+        # uuid for the camera point
+        id = str(uuid.uuid4())
+        print(uuid)
 
-        for i in range(self.count):
-            light = bpy.data.lights.new('Point', 'POINT')
-            obj = bpy.data.objects.new("LightObject", light)
+        emptyObject = bpy.data.objects.new("CameraPoint", None)
 
-            angle = i * math.pi * 2 / self.count
+        # Add the point to collection
+        parent = bpy.data.collections.get("Points")
+        if parent is None:
+            parent = bpy.data.collections.new("Points")
+            bpy.context.scene.collection.children.link(parent)
 
-            location = (
-                math.cos(angle) * self.radius,
-                math.sin(angle) * self.radius,
-                self.height,
-            )
+        # Position the point
+        emptyObject.location = bpy.context.scene.cursor.location
 
-            obj.location = location
-            obj.data.energy = self.energy
-            lights.append(obj)
+        # set unique id
+        emptyObject["uuid"] = id
 
-        parent = bpy.data.collections["Lights"]
-        empty = bpy.data.objects.new('Light Ring Empty', None)
-        empty.location = (0, 0, 0)
-        parent.objects.link(empty)
-
-        for obj in lights:
-            parent.objects.link(obj)
-            obj.parent = empty
-
-
-        return { 'FINISHED' }
+        parent.objects.link(emptyObject)
+        return {'FINISHED'}
