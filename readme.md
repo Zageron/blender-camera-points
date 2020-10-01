@@ -1,5 +1,10 @@
 # Setting up Blender for Development with Engine
 
+## Notes
+
+- example and samples are out of date.
+- Addon folder is the meat and potatoes.
+
 ## Setting up pip
 
 ``` bash
