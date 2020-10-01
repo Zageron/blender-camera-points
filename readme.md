@@ -4,7 +4,7 @@
 
 ``` bash
 # Navidate to blender's python directory. (Directory may be different.)
-cd "/c/Program Files/Blender Foundation/Blender 2.82/2.82/python/bin"
+cd "/c/Program Files/Blender Foundation/Blender 2.90/2.90/python/bin"
 
 # Acquire get-pip script.
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
@@ -23,20 +23,26 @@ rm get-pip.py
 
 ``` bash
 # Navidate to blender's python directory. (Directory may be different.)
-cd "/c/Program Files/Blender Foundation/Blender 2.82/2.82/python/bin"
+cd "/c/Program Files/Blender Foundation/Blender 2.90/2.90/python/bin"
 
 # Install the fake blender API module.
-./python.exe -m pip install fake-bpy-module-2.82
+./python.exe -m pip install fake-bpy-module-2.90
 
 # Install pymongo.
 ./python.exe -m pip install pymongo
+
+# Install dotenv
+./python.exe -m pip install python-dotenv
+
+# Install dnspython
+./python.exe -m pip install dnspython
 ```
 
 ## VSCode Setup
 
 ``` bash
 # Navidate to blender's python directory. (Directory may be different.)
-cd "/c/Program Files/Blender Foundation/Blender 2.82/2.82/python/bin"
+cd "/c/Program Files/Blender Foundation/Blender 2.90/2.90/python/bin"
 
 # Install the linter and formatter.
 # (This will keep your existing linter and formatter safe.)
