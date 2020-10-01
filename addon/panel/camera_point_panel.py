@@ -3,15 +3,16 @@ import bpy
 from bpy.props import FloatVectorProperty
 
 bl_info = {
-    "name" : "Camera Point Panel",
-    "author" : "Zageron",
-    "description" : "Panel for controlling the camera point properties on a node.",
-    "blender" : (2, 90, 0),
-    "version" : (0, 1, 0),
-    "location" : "",
-    "warning" : "",
-    "category" : "Generic"
+    "name": "Camera Point Panel",
+    "author": "Zageron",
+    "description": "Panel for controlling the camera point properties on a node.",
+    "blender": (2, 90, 0),
+    "version": (0, 1, 0),
+    "location": "",
+    "warning": "",
+    "category": "Generic"
 }
+
 
 class View3DPanel:
     bl_space_type = 'VIEW_3D'
@@ -21,6 +22,7 @@ class View3DPanel:
     @classmethod
     def poll(cls, context):
         return (context.object is not None)
+
 
 class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
     bl_idname = "ZAG_PT_Camera_Point"
@@ -32,7 +34,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
         name="Location",
         description="Location as a vector",
         subtype="XYZ",
-        default=(0,0,0),
+        default=(0, 0, 0),
         precision=6,
         unit="LENGTH"
     )
