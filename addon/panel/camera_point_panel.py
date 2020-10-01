@@ -46,8 +46,9 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
         id = selectedObject.get("uuid")
         if id:
             layout.label(text="Active Camera Point: " + selectedObject.name)
-            row = layout.row(align=True)
-            row.prop(selectedObject, "location")
+            layout.prop(selectedObject, "location")
+            layout.label(text="UUID: "+ id)
+            layout.operator("view3d.view_selected")
 
         # Button to snap to the selected point (say we grabbed it in the collections)
         # Preview Mode vs Edit Mode
