@@ -1,8 +1,12 @@
 import bpy
 import uuid
+import types
+import typing
+
+from bpy import context as Context, types as Types
 
 
-class zag_op_AddCameraPoint(bpy.types.Operator):
+class zag_op_AddCameraPoint(Types.Operator):
     """ Add a camera point, with associated metadata, to the scene. """
 
     bl_idname = "zag.add_camera_point"
@@ -22,11 +26,10 @@ class zag_op_AddCameraPoint(bpy.types.Operator):
     #     layout.prop(self, 'count')
     #     layout.prop(self, 'energy')
 
-    def execute(self, context):
+    def execute(self, context: Context):
 
         # uuid for the camera point
-        id = str(uuid.uuid4())
-        print(uuid)
+        id: str = str(uuid.uuid4())
 
         emptyObject = bpy.data.objects.new("CameraPoint", None)
 
@@ -39,8 +42,34 @@ class zag_op_AddCameraPoint(bpy.types.Operator):
         # Position the point
         emptyObject.location = bpy.context.scene.cursor.location
 
+        # Lock up the rotation of the point by default.
+        emptyObject.lock_rotation = [True, True, True]
+        emptyObject.lock_rotation_w = True
+        emptyObject.lock_rotations_4d = True
+        emptyObject.lock_scale = [True, True, True]
+
         # set unique id
-        emptyObject["uuid"] = id
+        emptyObject["zag.uuid"] = id
+        emptyObject["zag.type"] = "CameraPoint"
 
         parent.objects.link(emptyObject)
+
+        # Create orientation position container
+        orientations = bpy.data.objects.new("OrientationPoint" + id, None)
+        orientations.empty_display_type = "SPHERE"
+        orientations.empty_display_size = .25
+        orientations.location[2] = 1.7
+        orientations["zag.uuid"] = id
+        orientations["zag.type"] = "OrientationPoint"
+
+        parent.objects.link(orientations)
+        orientations.parent = emptyObject
+
+        orientations.lock_location = [True, True, True]
+        orientations.lock_rotation = [True, True, True]
+        orientations.lock_rotation_w = True
+        orientations.lock_rotations_4d = True
+        orientations.lock_scale = [True, True, True]
+
+        bpy.context.view_layer.objects.active = emptyObject
         return {'FINISHED'}

@@ -29,31 +29,65 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
     bl_label = "Camera Point Panel"
     bl_context = "objectmode"
 
-    # Properties
-    location: FloatVectorProperty(
-        name="Location",
-        description="Location as a vector",
-        subtype="XYZ",
-        default=(0, 0, 0),
-        precision=6,
-        unit="LENGTH"
-    )
-
     def draw(self, context):
         layout = self.layout
 
-        selectedObject = bpy.context.view_layer.objects.active
+        if context.object is not None:
+            selectedObject = bpy.context.view_layer.objects.active
+            id: str = selectedObject.get("zag.uuid")
+            if selectedObject.get("zag.type") == "CameraPoint":
+                layout.label(text="UUID: " + id)
 
-        id = selectedObject.get("uuid")
-        if id:
-            layout.label(text="Active Camera Point: " + selectedObject.name)
-            layout.prop(selectedObject, "location")
-            layout.label(text="UUID: "+ id)
-            layout.operator("view3d.view_selected")
+                layout.separator()
+
+                # Location of the physical player point.
+                layout.prop(data=selectedObject,
+                            property="location", text="Location")
+
+                ## Begin Section for Orientations
+                layout.separator()
+
+                ## Check for orientations.
+                orientationPointObject = bpy.data.objects.get(
+                    "OrientationPoint" + id)
+                orientations = orientationPointObject.children
+                layout.label(text="Orientations ({count}/{maximum})"
+                             .format(
+                                 count=orientations.__len__(),
+                                 maximum=4))
+
+                layout.operator(
+                    operator="view3d.view_selected", text="Focus on Point", icon="FORWARD")
+
+                # Add Orientation
+                layout.operator(
+                    "zag.add_node_orientation",
+                    text="Add New Orientation",
+                    icon="OUTLINER_OB_POINTCLOUD")
+
+                for orientation in orientations:
+                    id: str = orientation["zag.uuid"]
+
+                    subLayout = layout.box()
+                    subLayout.prop(
+                        data=orientation, property="rotation_euler", text="Orientation")
+                    adjustCameraProps = subLayout.operator(
+                        "zag.adjust_camera_point_orientation",
+                        text="Realtime Orientation Adjust",
+                        icon="CON_CAMERASOLVER")
+                    adjustCameraProps.uuid = id
+
+                    removeProps = subLayout.operator(
+                        "zag.remove_node_orientation",
+                        text="Remove Orientation",
+                        icon="X"
+                    )
+                    removeProps.uuidToRemove = "Orientation" + id
+            else:
+                layout.label(text="No camera point selected.")
         else:
-            layout.label(text="No camera point selected.")
+            layout.label(text="No object is selected.")
 
-        # Button to snap to the selected point (say we grabbed it in the collections)
         # Preview Mode vs Edit Mode
         ## Preview Mode should stick the primary to the point, at the correct orientation.
         ## Edit Mode should just move to the object as normal viewport might.
