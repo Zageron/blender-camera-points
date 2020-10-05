@@ -55,6 +55,7 @@ def __save_internal_file():
     text.clear()
     text.write(json.dumps(__activeDataInstance, indent=4))
 
+
 def __init_internal_file():
     global __activeDataInstance
     __activeDataInstance = {
@@ -111,6 +112,7 @@ def AddCameraPoint(uuid: str) -> bool:
     __save_internal_file()
     pass
 
+
 def __RemoveAllChildren(obj: types.Object):
     if len(obj.children) > 0:
         for child in obj.children:
@@ -118,18 +120,24 @@ def __RemoveAllChildren(obj: types.Object):
 
     if obj.get("zag.type") == "Orientation":
         RemoveOrientation(obj["zag.uuid"])
+    else:
+        __RemoveObject(obj)
 
-    __RemoveObject(obj)
 
 def RemoveCameraPoint(uuid: str) -> bool:
     __load_internal_file()
     cameraPoints: list = __get_camera_points()
-    cameraPoints = [point for point in cameraPoints if point.get("zag.uuid") != uuid]
+    cameraPoints = [
+        point for point in cameraPoints if point.get("zag.uuid") != uuid]
     __activeDataInstance.update(camera_points=cameraPoints)
     __save_internal_file()
 
     # Scene object removal
-    cameraPointToRemove = [point for point in cameraPoints if point.get("zag.uuid") == uuid]
+    objects = bpy.data.objects
+    cameraPointToRemove = [obj for obj in objects if obj.get("zag.uuid") == uuid and obj.get("zag.type") == "CameraPoint"]
+    if cameraPointToRemove is not None:
+        cpr = cameraPointToRemove[0]
+        __RemoveAllChildren(cpr)
 
 
 def AddOrientation(uuid: str) -> bool:
@@ -141,6 +149,7 @@ def RemoveOrientation(uuid: str) -> bool:
     objs = bpy.data.objects
     obj = [item for item in objs if item.get("zag.uuid") == uuid]
     objs.remove(obj[0], do_unlink=True)
+
 
 def __RemoveObject(obj: types.Object):
     objs = bpy.data.objects
@@ -179,3 +188,47 @@ def SetPreviewCamera(previewCameraState: bool = False):
     if previewCollection is None:
         previewCollection = bpy.data.collections.new("Previewing")
         bpy.context.scene.collection.children.link(previewCollection)
+
+
+def __GetWorldLocation(obj: types.Object) -> types.Object:
+    if obj.parent:
+        return obj.location + __GetWorldLocation(obj.parent)
+
+    return obj.location
+
+def Render():
+    #output_path = bpy.context.scene.render.filepath
+    #bpy.context.scene.render.filepath = os.path.join(output_path, ".png")
+    #bpy.ops.render.render(animation=False, write_still=True)
+
+    # Grab "Production Camera"
+    productionCamera: bpy.types.Object
+    for camera in bpy.data.objects:
+        if camera.get("zag.type") == "ProductionCamera":
+            productionCamera = camera
+
+    if productionCamera is None:
+        print("Unable to render, no ProductionCamera.")
+        return
+
+    # Construct the hierarchy of objects.
+    # GetAllCameraPoints
+    objects: bpy.types.Object = bpy.data.objects
+    cameraPoints: list = [obj for obj in objects if obj.get("zag.type") == "CameraPoint"]
+
+    cp: types.Object
+    for cp in cameraPoints:
+        id: str = cp.get("zag.uuid")
+        orientations: list = [obj for obj in bpy.data.objects if obj.get("zag.type") == "Orientation" and obj.parent.get("zag.uuid") == id]
+        print(orientations)
+
+        output_path = bpy.context.scene.render.filepath
+        orientation: types.Object
+        for orientation in orientations:
+            productionCamera.rotation_euler = orientation.rotation_euler
+            productionCamera.location = __GetWorldLocation(orientation)
+
+            bpy.context.scene.render.filepath = os.path.join(output_path, "{id}.png".format(id=orientation.get("zag.uuid")))
+            bpy.ops.render.render(animation=False, write_still=True)
+
+        bpy.context.scene.render.filepath = output_path

@@ -32,7 +32,7 @@ class zag_op_AddOrientation(Types.Operator):
             orientationObject: Types.Object = bpy.data.objects.new("Orientation-{id}".format(id=id), None)
             orientationObject.empty_display_size = 1.0
             orientationObject.empty_display_type = "SINGLE_ARROW"
-            orientationObject.rotation_euler[0] = -1.570796
+            orientationObject.rotation_euler[0] = 1.570796
 
             # Lock up the object by default.
             orientationObject.lock_scale = [True, True, True]

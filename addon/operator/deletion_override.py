@@ -42,7 +42,10 @@ def CheckTypeAndDelete(context: Types.Context, hierarchy: bool = False):
     if count == 0:
         activeCollection = context.view_layer.active_layer_collection
         if activeCollection.name != "Points":
-            bpy.data.collections.remove(activeCollection.collection)
+            if hierarchy:
+                bpy.data.collections.remove(activeCollection.collection)
+            else:
+                print(activeCollection.name + 'Please delete hierarchy to delete collections.')
         else:
             print(activeCollection.name + ' collection is protected.')
 

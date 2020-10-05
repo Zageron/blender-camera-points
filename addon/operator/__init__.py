@@ -5,6 +5,7 @@ from .remove_orientation import zag_op_RemoveOrientation
 from .serialize_points import zag_op_SerializePoints
 from .deletion_override import zag_op_DeletionOverride
 from .deletion_override import zag_op_CollectionDeletionOverride
+from .render_all import zag_op_RenderAll
 
 classes = (
     zag_op_AddCameraPoint,
@@ -13,7 +14,8 @@ classes = (
     zag_op_RemoveOrientation,
     zag_op_SerializePoints,
     zag_op_DeletionOverride,
-    zag_op_CollectionDeletionOverride
+    zag_op_CollectionDeletionOverride,
+    zag_op_RenderAll
 )
 
 def register_operators():
