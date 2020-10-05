@@ -17,7 +17,7 @@ class zag_op_AddOrientation(Types.Operator):
             selectedObject: Types.Object = context.active_object
             if selectedObject.get("zag.type") == "CameraPoint":
                 id: str = selectedObject.get("zag.uuid")
-                orientationPoint = bpy.data.objects.get("OrientationPoint" + id)
+                orientationPoint = bpy.data.objects.get("OrientationPoint-{id}".format(id=id))
                 if orientationPoint.children.__len__() < 4:
                     return True
 
@@ -29,7 +29,7 @@ class zag_op_AddOrientation(Types.Operator):
 
             # Initialize the orientation object.
             id: str = str(uuid.uuid4())
-            orientationObject: Types.Object = bpy.data.objects.new("Orientation" + id, None)
+            orientationObject: Types.Object = bpy.data.objects.new("Orientation-{id}".format(id=id), None)
             orientationObject.empty_display_size = 1.0
             orientationObject.empty_display_type = "SINGLE_ARROW"
             orientationObject.rotation_euler[0] = -1.570796
@@ -48,7 +48,7 @@ class zag_op_AddOrientation(Types.Operator):
             pointsCollection.objects.link(orientationObject)
 
             parentId: str = selectedObject.get("zag.uuid")
-            parent = bpy.data.objects.get("OrientationPoint" + parentId)
+            parent = bpy.data.objects.get("OrientationPoint-{id}".format(id=parentId))
             orientationObject.parent = parent
 
         # Fixup

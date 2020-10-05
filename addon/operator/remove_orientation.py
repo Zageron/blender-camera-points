@@ -2,6 +2,9 @@ import bpy
 from bpy import context as Context, types as Types
 import uuid
 
+from ..state import RemoveOrientation
+from bpy.props import StringProperty
+
 class zag_op_RemoveOrientation(Types.Operator):
     """ Try to remove an orientation from the camera point node. """
 
@@ -9,7 +12,7 @@ class zag_op_RemoveOrientation(Types.Operator):
     bl_label = "Remove Node Orientation"
     bl_options = {'REGISTER', 'UNDO'}
 
-    uuidToRemove = bpy.props.StringProperty(
+    uuidToRemove: StringProperty(
         name="UUID to Remove",
         description="Removes the orientation matching the UUID, if valid.",
         default="Invalid")

@@ -1,31 +1,27 @@
 import bpy
+from ..state import cameraPreviewIsActive
 
 from bpy import context as Context, types as Types
 
+from bpy.props import StringProperty
 
-class ZAG_OP_AdjustCameraPointOrientation(bpy.types.Operator):
+class zag_op_AdjustCameraPointOrientation(bpy.types.Operator):
     bl_idname = "zag.adjust_camera_point_orientation"
     bl_label = "ZAG Adjust Camera Point Orientation"
     bl_description = "Camera Point Adjustment Modal"
-    bl_options = {"REGISTER", "UNDO", "BLOCKING"}
+    bl_options = {"REGISTER", "BLOCKING", "GRAB_CURSOR", "INTERNAL"}
 
-    uuid = bpy.props.StringProperty(
+    uuid: StringProperty(
         name="Orientation UUID",
         description="UUID of the orientation we want to adjust..",
         default="Invalid")
 
     @classmethod
     def poll(cls, context: Context):
-        if (context.object is not None):
-            selectedObject = context.active_object
-
-            if selectedObject.get("zag.type") == "CameraPoint":
-                return True
-
-        return False
+        return cameraPreviewIsActive
 
     def invoke(self, context: Context, event: Types.Event):
-        if uuid != "Invalid":
+        if self.uuid != "Invalid":
             context.window_manager.modal_handler_add(self)
             self.setup(context)
             return {"RUNNING_MODAL"}

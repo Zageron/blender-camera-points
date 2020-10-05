@@ -35,7 +35,13 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
         if context.object is not None:
             selectedObject = bpy.context.view_layer.objects.active
             id: str = selectedObject.get("zag.uuid")
-            if selectedObject.get("zag.type") == "CameraPoint":
+
+            objectType = selectedObject.get("zag.type")
+            if objectType == "OrientationPoint":
+                layout.label(text="Please select:")
+                layout.label(text="    - An Orientation")
+                layout.label(text="    - The parent Camera Point")
+            elif objectType == "CameraPoint":
                 layout.label(text="UUID: " + id)
 
                 layout.separator()
@@ -49,7 +55,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
 
                 ## Check for orientations.
                 orientationPointObject = bpy.data.objects.get(
-                    "OrientationPoint" + id)
+                    "OrientationPoint-{id}".format(id=id))
                 orientations = orientationPointObject.children
                 layout.label(text="Orientations ({count}/{maximum})"
                              .format(
@@ -57,7 +63,12 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
                                  maximum=4))
 
                 layout.operator(
-                    operator="view3d.view_selected", text="Focus on Point", icon="FORWARD")
+                    operator="view3d.view_selected", text="Focus on Point", icon="FORWARD"
+                )
+
+                layout.operator(
+                    operator="zag.serialize_points", text="Save", icon="FILE_TICK"
+                )
 
                 # Add Orientation
                 layout.operator(
@@ -82,7 +93,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
                         text="Remove Orientation",
                         icon="X"
                     )
-                    removeProps.uuidToRemove = "Orientation" + id
+                    removeProps.uuidToRemove = "Orientation-{id}".format(id=id)
             else:
                 layout.label(text="No camera point selected.")
         else:

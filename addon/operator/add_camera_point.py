@@ -4,6 +4,7 @@ import types
 import typing
 
 from bpy import context as Context, types as Types
+from ..state import AddCameraPoint
 
 
 class zag_op_AddCameraPoint(Types.Operator):
@@ -31,7 +32,7 @@ class zag_op_AddCameraPoint(Types.Operator):
         # uuid for the camera point
         id: str = str(uuid.uuid4())
 
-        emptyObject = bpy.data.objects.new("CameraPoint", None)
+        emptyObject = bpy.data.objects.new("CameraPoint-{id}".format(id=id), None)
 
         # Add the point to collection
         parent = bpy.data.collections.get("Points")
@@ -55,7 +56,7 @@ class zag_op_AddCameraPoint(Types.Operator):
         parent.objects.link(emptyObject)
 
         # Create orientation position container
-        orientations = bpy.data.objects.new("OrientationPoint" + id, None)
+        orientations = bpy.data.objects.new("OrientationPoint-{id}".format(id=id), None)
         orientations.empty_display_type = "SPHERE"
         orientations.empty_display_size = .25
         orientations.location[2] = 1.7
@@ -70,6 +71,10 @@ class zag_op_AddCameraPoint(Types.Operator):
         orientations.lock_rotation_w = True
         orientations.lock_rotations_4d = True
         orientations.lock_scale = [True, True, True]
+
+        orientations.hide_select = True
+
+        AddCameraPoint(uuid=id)
 
         bpy.context.view_layer.objects.active = emptyObject
         return {'FINISHED'}
