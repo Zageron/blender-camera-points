@@ -1,5 +1,9 @@
 import bpy
+import os
+
 from bpy import context as Context, types as Types
+
+from ..state import ExportFile
 
 
 class zag_op_SerializePoints(Types.Operator):
@@ -14,14 +18,5 @@ class zag_op_SerializePoints(Types.Operator):
         return True
 
     def execute(self, context: Context):
-        DATAPATH = "data/"
-
-        if not os.path.exists(DATAPATH):
-            os.mkdir(DATAPATH)
-
-            filepath = bpy.data.filepath
-            file = open(filepath + DATAPATH + "textfile", "w")
-            file.write(json.dump(zagDataObject))
-            file.close()
-
+        ExportFile()
         return {"FINISHED"}

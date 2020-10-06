@@ -29,13 +29,14 @@ def __load_file():
         __init_file()
 
 
-def __save_file():
+def ExportFile():
     filepath = bpy.path.abspath("//")
     if not os.path.exists(filepath + DATAPATH):
         os.mkdir(filepath + DATAPATH)
 
     with open(filepath + FILEPATH, "w") as outfile:
-        json.dump(__activeDataInstance, outfile, indent=4)
+        text: types.Text = bpy.data.texts.get(TEXTNAME)
+        outfile.write(text.as_string())
 
 
 def __load_internal_file():
