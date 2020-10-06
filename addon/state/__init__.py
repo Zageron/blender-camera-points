@@ -18,15 +18,16 @@ TEXTNAME = "CameraPoints"
 __activeDataInstance: dict = {}
 
 
-def __load_file():
+def __RemoveAllChildren(obj: types.Object):
+    ''' Removes the hierarchy of all objects under an onbject in the Camera Point hierarchy. '''
+    if len(obj.children) > 0:
+        for child in obj.children:
+            __RemoveAllChildren(child)
 
-    filepath = bpy.path.abspath("//")
-    if os.path.exists(filepath + FILEPATH):
-        with open(filepath + FILEPATH, "r") as infile:
-            global __activeDataInstance
-            __activeDataInstance = json.loads(infile.read())
+    if obj.get("zag.type") == "Orientation":
+        RemoveOrientation(obj["zag.uuid"])
     else:
-        __init_file()
+        __RemoveObject(obj)
 
 
 def ExportFile():
@@ -66,21 +67,11 @@ def __init_internal_file():
     __load_internal_file()
 
 
-def __init_file():
-    global __activeDataInstance
-
-    __activeDataInstance = {
-        "camera_points": {},
-    }
-    __save_file()
-    __load_file()
-
-
-def __get_camera_points() -> list:
+def __get_camera_points() -> dict:
     if __activeDataInstance is not None:
-        return list(__activeDataInstance.get("camera_points"))
+        return __activeDataInstance.get("camera_points")
     else:
-        return []
+        return {}
 
 
 def __get_camera_point(cameraPoints: list, uuid: str) -> dict:
@@ -95,43 +86,26 @@ def AddCameraPoint(uuid: str) -> bool:
     __load_internal_file()
 
     cameraPointData = {
-        "camera_point": {
-            "uuid": "{uuid}".format(uuid=uuid),
-            "orientations": [],
-            # Gonna need links to other nodes with directions and such...
-        }
+        "possible_node_data": "blah",
+        "orientations": {}
     }
 
-    cameraPoints: list = __get_camera_points()
-    for point in cameraPoints:
-        if point.get("uuid") == uuid:
-            return False
+    cameraPoints: dict = __get_camera_points()
 
-    cameraPoints.append(cameraPointData)
+    if not cameraPoints.get(uuid):
+        cameraPoints[uuid] = cameraPointData
 
-    __activeDataInstance.update(camera_points=cameraPoints)
-    __save_internal_file()
-    pass
-
-
-def __RemoveAllChildren(obj: types.Object):
-    if len(obj.children) > 0:
-        for child in obj.children:
-            __RemoveAllChildren(child)
-
-    if obj.get("zag.type") == "Orientation":
-        RemoveOrientation(obj["zag.uuid"])
-    else:
-        __RemoveObject(obj)
+        __activeDataInstance.update(camera_points=cameraPoints)
+        __save_internal_file()
 
 
 def RemoveCameraPoint(uuid: str) -> bool:
     __load_internal_file()
     cameraPoints: list = __get_camera_points()
-    cameraPoints = [
-        point for point in cameraPoints if point.get("zag.uuid") != uuid]
-    __activeDataInstance.update(camera_points=cameraPoints)
-    __save_internal_file()
+    if cameraPoints.get(uuid):
+        del cameraPoints[uuid]
+        __activeDataInstance.update(camera_points=cameraPoints)
+        __save_internal_file()
 
     # Scene object removal
     objects = bpy.data.objects
@@ -141,15 +115,28 @@ def RemoveCameraPoint(uuid: str) -> bool:
         __RemoveAllChildren(cpr)
 
 
-def AddOrientation(uuid: str) -> bool:
-    pass
+def AddOrientation(orientationId: str, cameraPointId: str):
+    __load_internal_file()
+
+    cameraPoints: dict = __get_camera_points()
+    cameraPoint: dict = cameraPoints[cameraPointId]
+    cameraPoint["orientations"][orientationId] = { "specialData": 238748234}
+    __activeDataInstance.update(camera_points=cameraPoints)
+    __save_internal_file()
 
 
-def RemoveOrientation(uuid: str) -> bool:
-    # TODO There's no json logic yet.
+def RemoveOrientation(orientationId: str, cameraPointId: str):
     objs = bpy.data.objects
-    obj = [item for item in objs if item.get("zag.uuid") == uuid]
+    obj = [item for item in objs if item.get("zag.uuid") == orientationId]
     objs.remove(obj[0], do_unlink=True)
+
+    # Data deletion
+    __load_internal_file()
+    cameraPoints: dict = __get_camera_points()
+    cameraPoint: dict = cameraPoints[cameraPointId]
+    del cameraPoint["orientations"][orientationId]
+    __activeDataInstance.update(camera_points=cameraPoints)
+    __save_internal_file()
 
 
 def __RemoveObject(obj: types.Object):

@@ -17,6 +17,12 @@ class zag_op_RemoveOrientation(Types.Operator):
         description="Removes the orientation matching the UUID, if valid.",
         default="Invalid")
 
+    cameraPointId: StringProperty(
+        name="UUID of Parent Camera Point",
+        description="Id of the parent of the orientation to remove.",
+        default="Invalid"
+    )
+
     @classmethod
     def poll(cls, context: Context):
         if (context.object is not None):
@@ -28,6 +34,8 @@ class zag_op_RemoveOrientation(Types.Operator):
         return False
 
     def execute(self, context: Context):
-        objs = bpy.data.objects
-        objs.remove(objs[self.uuidToRemove], do_unlink=True)
-        return {'FINISHED'}
+        if self.uuidToRemove != "Invalid" and self.cameraPointId != "Invalid":
+            RemoveOrientation(self.uuidToRemove, self.cameraPointId)
+            return {'FINISHED'}
+        else:
+            return {"CANCELED"}

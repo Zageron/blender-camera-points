@@ -2,6 +2,7 @@ import bpy
 import uuid
 from bpy import context as Context, types as Types
 import typing
+from ..state import AddOrientation
 
 
 class zag_op_AddOrientation(Types.Operator):
@@ -28,8 +29,8 @@ class zag_op_AddOrientation(Types.Operator):
         if selectedObject.get("zag.type") == "CameraPoint":
 
             # Initialize the orientation object.
-            id: str = str(uuid.uuid4())
-            orientationObject: Types.Object = bpy.data.objects.new("Orientation-{id}".format(id=id), None)
+            orientationId: str = str(uuid.uuid4())
+            orientationObject: Types.Object = bpy.data.objects.new("Orientation-{orientationId}".format(orientationId=orientationId), None)
             orientationObject.empty_display_size = 1.0
             orientationObject.empty_display_type = "SINGLE_ARROW"
             orientationObject.rotation_euler[0] = 1.570796
@@ -39,7 +40,7 @@ class zag_op_AddOrientation(Types.Operator):
             orientationObject.lock_location = [True, True, True]
 
             # Custom Properties
-            orientationObject["zag.uuid"] = id
+            orientationObject["zag.uuid"] = orientationId
             orientationObject["zag.type"] = "Orientation"
 
 
@@ -48,12 +49,9 @@ class zag_op_AddOrientation(Types.Operator):
             pointsCollection.objects.link(orientationObject)
 
             parentId: str = selectedObject.get("zag.uuid")
-            parent = bpy.data.objects.get("OrientationPoint-{id}".format(id=parentId))
+            parent = bpy.data.objects.get("OrientationPoint-{orientationId}".format(orientationId=parentId))
             orientationObject.parent = parent
 
-        # Fixup
-        #emptyObject["orientations"] = [[] for i in range(3)]
-        #emptyObject["orientations"][0] = typing.List[float]
-        #emptyObject["orientations"][1] = typing.List[float]
-        #emptyObject["orientations"][2] = typing.List[float]
+            AddOrientation(orientationId, parentId)
+
         return {"FINISHED"}

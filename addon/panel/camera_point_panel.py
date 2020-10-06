@@ -34,7 +34,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
 
         if context.object is not None:
             selectedObject = bpy.context.view_layer.objects.active
-            id: str = selectedObject.get("zag.uuid")
+            cameraPointId: str = selectedObject.get("zag.uuid")
 
             objectType = selectedObject.get("zag.type")
             if objectType == "OrientationPoint":
@@ -42,7 +42,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
                 layout.label(text="    - An Orientation")
                 layout.label(text="    - The parent Camera Point")
             elif objectType == "CameraPoint":
-                layout.label(text="UUID: " + id)
+                layout.label(text="UUID: " + cameraPointId)
 
                 layout.separator()
 
@@ -55,7 +55,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
 
                 ## Check for orientations.
                 orientationPointObject = bpy.data.objects.get(
-                    "OrientationPoint-{id}".format(id=id))
+                    "OrientationPoint-{id}".format(id=cameraPointId))
                 orientations = orientationPointObject.children
                 layout.label(text="Orientations ({count}/{maximum})"
                              .format(
@@ -77,7 +77,7 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
                     icon="OUTLINER_OB_POINTCLOUD")
 
                 for orientation in orientations:
-                    id: str = orientation["zag.uuid"]
+                    orientationId: str = orientation["zag.uuid"]
 
                     subLayout = layout.box()
                     subLayout.prop(
@@ -86,14 +86,15 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
                         "zag.adjust_camera_point_orientation",
                         text="Realtime Orientation Adjust",
                         icon="CON_CAMERASOLVER")
-                    adjustCameraProps.uuid = id
+                    adjustCameraProps.uuid = orientationId
 
                     removeProps = subLayout.operator(
                         "zag.remove_node_orientation",
                         text="Remove Orientation",
                         icon="X"
                     )
-                    removeProps.uuidToRemove = "Orientation-{id}".format(id=id)
+                    removeProps.uuidToRemove = orientationId
+                    removeProps.cameraPointId = cameraPointId
             else:
                 layout.label(text="No camera point selected.")
         else:
