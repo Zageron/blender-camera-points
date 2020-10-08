@@ -88,6 +88,9 @@ class ZAG_CameraPointPanel(View3DPanel, bpy.types.Panel):
                         icon="CON_CAMERASOLVER")
                     adjustCameraProps.uuid = orientationId
 
+                    subLayout.prop(data=orientation, property="zagLinkNode0", text="Linked Node")
+                    subLayout.prop(data=orientation, property="zagLinkNode1", text="Linked Node")
+
                     removeProps = subLayout.operator(
                         "zag.remove_node_orientation",
                         text="Remove Orientation",

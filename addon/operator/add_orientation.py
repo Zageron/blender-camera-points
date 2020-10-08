@@ -1,6 +1,7 @@
 import bpy
 import uuid
 from bpy import context as Context, types as Types
+from bpy.props import PointerProperty
 import typing
 from ..state import AddOrientation
 
@@ -19,7 +20,7 @@ class zag_op_AddOrientation(Types.Operator):
             if selectedObject.get("zag.type") == "CameraPoint":
                 id: str = selectedObject.get("zag.uuid")
                 orientationPoint = bpy.data.objects.get("OrientationPoint-{id}".format(id=id))
-                if orientationPoint.children.__len__() < 4:
+                if len(orientationPoint.children) < 4:
                     return True
 
         return False
@@ -42,7 +43,6 @@ class zag_op_AddOrientation(Types.Operator):
             # Custom Properties
             orientationObject["zag.uuid"] = orientationId
             orientationObject["zag.type"] = "Orientation"
-
 
             # Add object to scene and Points collection, set parent.
             pointsCollection: Types.Collection = bpy.data.collections.get("Points")
