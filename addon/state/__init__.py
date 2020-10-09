@@ -181,6 +181,14 @@ def __GetWorldLocation(obj: types.Object) -> types.Object:
 
     return obj.location
 
+def __CorrectCameraOrientation(rotation_euler: list) -> list:
+    temp: list = list(rotation_euler)
+    temp[2] += 3.14
+    return temp
+
+def MoveCameraToOrientation(orientation: types.Object, productionCamera: types.Object):
+    productionCamera.rotation_euler = __CorrectCameraOrientation(orientation.rotation_euler)
+    productionCamera.location = __GetWorldLocation(orientation)
 
 def Render(skipRendering: bool, calculateScreenPoints: bool):
     # Grab "Production Camera"
@@ -207,10 +215,9 @@ def Render(skipRendering: bool, calculateScreenPoints: bool):
         output_path = bpy.context.scene.render.filepath
         orientation: types.Object
         for orientation in orientations:
-            productionCamera.rotation_euler = orientation.rotation_euler
-            productionCamera.location = __GetWorldLocation(orientation)
+            MoveCameraToOrientation(orientation, productionCamera)
 
-            bpy.context.scene.render.filepath = os.path.join(output_path, "{id}.png".format(id=orientation.get("zag.uuid")))
-            bpy.ops.render.render(animation=False, write_still=True)
-
+            if not skipRendering:
+                bpy.context.scene.render.filepath = os.path.join(output_path, "{id}.png".format(id=orientation.get("zag.uuid")))
+                bpy.ops.render.render(animation=False, write_still=True)
         bpy.context.scene.render.filepath = output_path
