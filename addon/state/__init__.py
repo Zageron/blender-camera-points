@@ -1,6 +1,7 @@
 import bpy
 import os
 import json
+from mathutils import Vector
 
 from bpy import types
 
@@ -117,10 +118,15 @@ def AddOrientation(orientationId: str, cameraPointId: str):
 
     cameraPoints: dict = __get_camera_points()
     cameraPoint: dict = cameraPoints[cameraPointId]
-    cameraPoint["orientations"][orientationId] = { "specialData": 238748234}
+    cameraPoint["orientations"][orientationId] = { "location": { "x": -1, "y": -1 } }
     __activeDataInstance.update(camera_points=cameraPoints)
     __save_internal_file()
 
+def UpdateOrientationTargets(orientationId: str, cameraPointId: str, point: Vector):
+    cameraPoints: dict = __get_camera_points()
+    cameraPoint: dict = cameraPoints[cameraPointId]
+    orientation:dict = cameraPoint["orientations"][orientationId]
+    orientation.update({"location": {  "x": point[0], "y": point[1] }})
 
 def RemoveOrientation(orientationId: str, cameraPointId: str):
     objs = bpy.data.objects
@@ -206,18 +212,45 @@ def Render(skipRendering: bool, calculateScreenPoints: bool):
     objects: bpy.types.Object = bpy.data.objects
     cameraPoints: list = [obj for obj in objects if obj.get("zag.type") == "CameraPoint"]
 
+    __load_internal_file()
+
     cp: types.Object
     for cp in cameraPoints:
         id: str = cp.get("zag.uuid")
         orientations: list = [obj for obj in bpy.data.objects if obj.get("zag.type") == "Orientation" and obj.parent.get("zag.uuid") == id]
-        print(orientations)
 
         output_path = bpy.context.scene.render.filepath
         orientation: types.Object
         for orientation in orientations:
             MoveCameraToOrientation(orientation, productionCamera)
 
+            if calculateScreenPoints:
+                p = __GetWorldLocation(orientation.zagLinkNode1.children[0])
+
+                from bpy_extras.object_utils import world_to_camera_view
+
+                scene = bpy.context.scene
+
+                # needed to rescale 2d coordinates
+                render = scene.render
+                res_x = render.resolution_x
+                res_y = render.resolution_y
+
+                cam = bpy.data.objects['Production Camera']
+                coords_2d = world_to_camera_view(scene, cam, p)
+
+                mirrored_2d: dict = { "x": abs(coords_2d.x), "y": abs(coords_2d.y - 1) }
+                # 2d data printout:
+                rnd = lambda i: round(i)
+
+                coordinates: Vector = (rnd(res_x*mirrored_2d["x"]), rnd(res_y*mirrored_2d["y"]), 0)
+
+                UpdateOrientationTargets(orientation.get("zag.uuid"), id, coordinates)
+
             if not skipRendering:
                 bpy.context.scene.render.filepath = os.path.join(output_path, "{id}.png".format(id=orientation.get("zag.uuid")))
                 bpy.ops.render.render(animation=False, write_still=True)
+
+        __save_internal_file()
         bpy.context.scene.render.filepath = output_path
+
