@@ -24,10 +24,7 @@ def __RemoveAllChildren(obj: types.Object):
         for child in obj.children:
             __RemoveAllChildren(child)
 
-    if obj.get("zag.type") == "Orientation":
-        RemoveOrientation(obj["zag.uuid"])
-    else:
-        __RemoveObject(obj)
+    __RemoveObject(obj)
 
 
 def ExportFile():
