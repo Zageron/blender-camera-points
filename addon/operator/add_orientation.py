@@ -40,15 +40,18 @@ class zag_op_AddOrientation(Types.Operator):
             orientationObject.lock_scale = [True, True, True]
             orientationObject.lock_location = [True, True, True]
 
+            # Get ParentID
+            parentId: str = selectedObject.get("zag.uuid")
+
             # Custom Properties
             orientationObject["zag.uuid"] = orientationId
             orientationObject["zag.type"] = "Orientation"
+            orientationObject["zag.node_uuid"] = parentId
 
             # Add object to scene and Points collection, set parent.
             pointsCollection: Types.Collection = bpy.data.collections.get("Points")
             pointsCollection.objects.link(orientationObject)
 
-            parentId: str = selectedObject.get("zag.uuid")
             parent = bpy.data.objects.get("OrientationPoint-{orientationId}".format(orientationId=parentId))
             orientationObject.parent = parent
 
