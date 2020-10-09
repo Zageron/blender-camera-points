@@ -11,3 +11,7 @@ def RegisterProperty():
         type=bpy.types.Object, poll=isValidOrientationObject)
     bpy.types.Object.zagLinkNode1 = PointerProperty(
         type=bpy.types.Object, poll=isValidOrientationObject)
+
+def UnregisterProperty():
+    del bpy.types.Object.zagLinkNode0
+    del bpy.types.Object.zagLinkNode1

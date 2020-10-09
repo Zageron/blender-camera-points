@@ -15,7 +15,7 @@ def register_addon():
     register_panels()
 
     from ..property import register_properties
-    register_properties
+    register_properties()
 
 def unregister_addon():
     from .addon_prefs import unregister_addon_preferences
@@ -32,3 +32,6 @@ def unregister_addon():
 
     from ..panel import unregister_panels
     unregister_panels()
+
+    from ..property import unregister_properties
+    unregister_properties()
