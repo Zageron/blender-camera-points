@@ -198,7 +198,7 @@ def MoveCameraToOrientation(orientation: types.Object, productionCamera: types.O
 
 def Render(skipRendering: bool, calculateScreenPoints: bool):
     # Grab "Production Camera"
-    productionCamera: bpy.types.Object
+    productionCamera: bpy.types.Object = None
     for camera in bpy.data.objects:
         if camera.get("zag.type") == "ProductionCamera":
             productionCamera = camera
@@ -236,7 +236,7 @@ def Render(skipRendering: bool, calculateScreenPoints: bool):
                 res_x = render.resolution_x
                 res_y = render.resolution_y
 
-                cam = bpy.data.objects['Production Camera']
+                cam = productionCamera
                 coords_2d = world_to_camera_view(scene, cam, p)
 
                 mirrored_2d: dict = { "x": abs(coords_2d.x), "y": abs(coords_2d.y - 1) }
