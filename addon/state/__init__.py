@@ -181,11 +181,8 @@ def __GetWorldLocation(obj: types.Object) -> types.Object:
 
     return obj.location
 
-def Render():
-    #output_path = bpy.context.scene.render.filepath
-    #bpy.context.scene.render.filepath = os.path.join(output_path, ".png")
-    #bpy.ops.render.render(animation=False, write_still=True)
 
+def Render(skipRendering: bool, calculateScreenPoints: bool):
     # Grab "Production Camera"
     productionCamera: bpy.types.Object
     for camera in bpy.data.objects:
