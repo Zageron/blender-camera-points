@@ -1,5 +1,5 @@
 from .add_camera_point import zag_op_AddCameraPoint
-from .adjust_camera_point_orientation import zag_op_AdjustCameraPointOrientation
+from .adjust_camera_point_orientation_modal import zag_op_AdjustCameraPointOrientationModal
 from .add_orientation import zag_op_AddOrientation
 from .remove_orientation import zag_op_RemoveOrientation
 from .serialize_points import zag_op_SerializePoints
@@ -10,7 +10,7 @@ from .render_all import zag_op_CalculateAll
 
 classes = (
     zag_op_AddCameraPoint,
-    zag_op_AdjustCameraPointOrientation,
+    zag_op_AdjustCameraPointOrientationModal,
     zag_op_AddOrientation,
     zag_op_RemoveOrientation,
     zag_op_SerializePoints,

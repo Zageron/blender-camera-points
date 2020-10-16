@@ -5,7 +5,7 @@ from bpy import context as Context, types as Types
 
 from bpy.props import StringProperty
 
-class zag_op_AdjustCameraPointOrientation(bpy.types.Operator):
+class zag_op_AdjustCameraPointOrientationModal(bpy.types.Operator):
     bl_idname = "zag.adjust_camera_point_orientation"
     bl_label = "ZAG Adjust Camera Point Orientation"
     bl_description = "Camera Point Adjustment Modal"
