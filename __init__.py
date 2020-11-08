@@ -3,7 +3,7 @@ bl_info = {
     "description": "Camera and perspective manager.",
     "author": "Zageron",
     "version": (1, 0),
-    "blender": (2, 90, 0),
+    "blender": (2, 83, 0),
     "location": "View3D",
     "category": "3D View",
 }

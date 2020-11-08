@@ -1,8 +1,8 @@
 {
-    "python.pythonPath": "C:\\Program Files\\Blender Foundation\\Blender 2.90\\2.90\\python\\bin\\python.exe",
+    "python.pythonPath": "c:\\Program Files\\Blender Foundation\\Blender 2.83\\2.83\\python\\bin\\python.exe",
     "python.autoComplete.extraPaths": [
-        "C:\\Program Files\\Blender Foundation\\Blender 2.90\\2.90\\python\\lib",
-        "C:\\Program Files\\Blender Foundation\\Blender 2.90\\2.90\\python\\Scripts"
+        "C:\\Program Files\\Blender Foundation\\Blender 2.83\\2.83\\python\\lib",
+        "C:\\Program Files\\Blender Foundation\\Blender 2.83\\2.83\\python\\Scripts"
     ],
     "blender.addon.reloadOnSave": true,
     "files.insertFinalNewline": true,
