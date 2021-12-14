@@ -1,6 +1,15 @@
-import bpy
+"""
+Helper class for functions used to save and load state and data.
+
+Eventually, I would like to remove this helper class
+moving the functionality closer to where it is used.
+"""
+
 import os
 import json
+from enum import Enum
+
+import bpy
 from mathutils import Vector
 
 from bpy import types
@@ -107,7 +116,8 @@ def RemoveCameraPoint(uuid: str) -> bool:
 
     # Scene object removal
     objects = bpy.data.objects
-    cameraPointToRemove = [obj for obj in objects if obj.get("zag.uuid") == uuid and obj.get("zag.type") == "CameraPoint"]
+    cameraPointToRemove = [obj for obj in objects if obj.get(
+        "zag.uuid") == uuid and obj.get("zag.type") == "CameraPoint"]
     if cameraPointToRemove is not None:
         cpr = cameraPointToRemove[0]
         __RemoveAllChildren(cpr)
@@ -118,15 +128,18 @@ def AddOrientation(orientationId: str, cameraPointId: str):
 
     cameraPoints: dict = __get_camera_points()
     cameraPoint: dict = cameraPoints[cameraPointId]
-    cameraPoint["orientations"][orientationId] = { "location": { "x": -1, "y": -1 } }
+    cameraPoint["orientations"][orientationId] = {
+        "location": {"x": -1, "y": -1}}
     __activeDataInstance.update(camera_points=cameraPoints)
     __save_internal_file()
+
 
 def UpdateOrientationTargets(orientationId: str, cameraPointId: str, point: Vector):
     cameraPoints: dict = __get_camera_points()
     cameraPoint: dict = cameraPoints[cameraPointId]
-    orientation:dict = cameraPoint["orientations"][orientationId]
-    orientation.update({"location": {  "x": point[0], "y": point[1] }})
+    orientation: dict = cameraPoint["orientations"][orientationId]
+    orientation.update({"location": {"x": point[0], "y": point[1]}})
+
 
 def RemoveOrientation(orientationId: str, cameraPointId: str):
     objs = bpy.data.objects
@@ -187,37 +200,82 @@ def __GetWorldLocation(obj: types.Object) -> types.Object:
 
     return obj.location
 
+
 def __CorrectCameraOrientation(rotation_euler: list) -> list:
     temp: list = list(rotation_euler)
     temp[2] += 3.14
     return temp
 
+
 def MoveCameraToOrientation(orientation: types.Object, productionCamera: types.Object):
-    productionCamera.rotation_euler = __CorrectCameraOrientation(orientation.rotation_euler)
+    productionCamera.rotation_euler = __CorrectCameraOrientation(
+        orientation.rotation_euler)
     productionCamera.location = __GetWorldLocation(orientation)
 
-def Render(skipRendering: bool, calculateScreenPoints: bool):
-    # Grab "Production Camera"
+
+def GetProductionCamera() -> bpy.types.Object:
+    """ Return the object holding the primary camera for the renders. """
+
     productionCamera: bpy.types.Object = None
+
     for camera in bpy.data.objects:
         if camera.get("zag.type") == "ProductionCamera":
             productionCamera = camera
+            break
 
-    if productionCamera is None:
-        print("Unable to render, no ProductionCamera.")
-        return
+    return productionCamera
+
+
+def IsSceneRenderable() -> bool:
+    """ Test whether the current scene is renderable. """
+
+    return GetProductionCamera() is not None
+
+
+def GetListOfCameraPointsToRender() -> list:
+    """ From blender data, grab all objects which type CameraPoint. """
+
+    return [obj for obj in bpy.data.objects if obj.get("zag.type") == "CameraPoint"]
+
+
+def GetListOfOrientationsToRender(cameraPoint: bpy.types.Object) -> list:
+    """ From blender data, grab all objects of type Orientation
+        which have the cameraPoint as their parent. """
+
+    parentId: str = cameraPoint.get("zag.uuid")
+    return [obj for obj in bpy.data.objects if obj.get("zag.type") == "Orientation" and obj.parent.get("zag.uuid") == parentId]
+
+class RenderSequenceState(Enum):
+    """ Described whether the sequence is finished or continuing. """
+    CONTINUE = 1
+    DONE = 2
+
+def MoveToNextOrientation() -> RenderSequenceState:
+    """ Move to the next orientation in the sequence.\n
+        Returns DONE when done, NEXT when continuing. """
+    ...
+
+def Render(skipRendering: bool, calculateScreenPoints: bool):
+    """ Render the currently active orientation point. """
+
+    # Grab "Production Camera", set active scene camera.
+    productionCamera: bpy.types.Object = GetProductionCamera()
+    bpy.context.scene.camera = productionCamera
 
     # Construct the hierarchy of objects.
     # GetAllCameraPoints
     objects: bpy.types.Object = bpy.data.objects
-    cameraPoints: list = [obj for obj in objects if obj.get("zag.type") == "CameraPoint"]
+    cameraPoints: list = [obj for obj in objects if obj.get(
+        "zag.type") == "CameraPoint"]
 
     __load_internal_file()
 
+    # Should likely separate the render and calculation pipelines.
+
     cp: types.Object
     for cp in cameraPoints:
-        id: str = cp.get("zag.uuid")
-        orientations: list = [obj for obj in bpy.data.objects if obj.get("zag.type") == "Orientation" and obj.parent.get("zag.uuid") == id]
+        cameraPointId: str = cp.get("zag.uuid")
+        orientations: list = GetListOfOrientationsToRender(cp)
 
         output_path = bpy.context.scene.render.filepath
         orientation: types.Object
@@ -225,7 +283,7 @@ def Render(skipRendering: bool, calculateScreenPoints: bool):
             MoveCameraToOrientation(orientation, productionCamera)
 
             if calculateScreenPoints:
-                p = __GetWorldLocation(orientation.zagLinkNode1.children[0])
+                p = __GetWorldLocation(orientation.zagLinkNode0.children[0])
 
                 from bpy_extras.object_utils import world_to_camera_view
 
@@ -239,18 +297,23 @@ def Render(skipRendering: bool, calculateScreenPoints: bool):
                 cam = productionCamera
                 coords_2d = world_to_camera_view(scene, cam, p)
 
-                mirrored_2d: dict = { "x": abs(coords_2d.x), "y": abs(coords_2d.y - 1) }
+                mirrored_2d: dict = {
+                    "x": abs(coords_2d.x), "y": abs(coords_2d.y - 1)}
                 # 2d data printout:
-                rnd = lambda i: round(i)
+                def rnd(i): return round(i)
 
-                coordinates: Vector = (rnd(res_x*mirrored_2d["x"]), rnd(res_y*mirrored_2d["y"]), 0)
+                coordinates: Vector = (
+                    rnd(res_x*mirrored_2d["x"]), rnd(res_y*mirrored_2d["y"]), 0)
 
-                UpdateOrientationTargets(orientation.get("zag.uuid"), id, coordinates)
+                UpdateOrientationTargets(
+                    orientation.get("zag.uuid"), id, coordinates)
 
             if not skipRendering:
-                bpy.context.scene.render.filepath = os.path.join(output_path, "{id}.png".format(id=orientation.get("zag.uuid")))
-                bpy.ops.render.render(animation=False, write_still=True)
+                bpy.context.scene.render.filepath = os.path.join(
+                    output_path, "{id}.png".format(id=orientation.get("zag.uuid")))
+                bpy.ops.render.render(
+                    animation=False, write_still=True, scene="Scene")
+                print("Rendering: " + bpy.context.scene.render.filepath)
 
         __save_internal_file()
         bpy.context.scene.render.filepath = output_path
-

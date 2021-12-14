@@ -7,4 +7,4 @@
 # W0511 - fixme - ignore TODOs in comments
 # W0611 - unused-import - typing module is needed for mypy
 
-disable=relative-beyond-top-level,invalid-name,fixme,import-error,line-too-long,locally-disabled,too-few-public-methods,unused-import
+disable=import-outside-toplevel,relative-beyond-top-level,invalid-name,fixme,import-error,line-too-long,locally-disabled,too-few-public-methods,unused-import
